@@ -1,0 +1,14 @@
+[database]
+host = "localhost"
+name = "psoriasis"
+user = "psoriasis"
+password = "psoriasis"
+
+[redis]
+address = "localhost"
+password = ""
+DbNumber = 0
+
+# unused
+[session]
+session_timeout = 0

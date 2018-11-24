@@ -1,21 +1,71 @@
 package main
 
 import (
-	"log"
+	"encoding/json"
 	"net/http"
+
+	"github.com/go-redis/redis"
+	"github.com/sirupsen/logrus"
 )
 
-func rootPage(w http.ResponseWriter, r *http.Request) {
+const (
+	DefaultConfigFile = "config.toml"
+)
+
+type MainHandler struct {
+	redisClient *redis.Client
+}
+
+// page principale
+func (h MainHandler) rootPage(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "not found", http.StatusNotFound)
 }
 
-func main() {
-	mux := http.ServeMux{}
+// page profil, GET pour recuperer le profil, POST pour le mettre a jour
+func (h MainHandler) profile(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		id := r.URL.Query().Get("id")
+		list, err := h.redisClient.HGetAll(id).Result()
+		if err != nil {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		if err := json.NewEncoder(w).Encode(list); err != nil {
+			logrus.Warningln(err)
+		}
+	case "POST":
+	default:
+		http.Error(w, "bad request", http.StatusBadRequest)
+	}
 
-	mux.HandleFunc("/", rootPage)
-	srv := http.Server{Handler: &mux}
+}
+
+func NewMainHandler(c *Config) MainHandler {
+	return MainHandler{
+		redisClient: redis.NewClient(c.RedisOptions()),
+	}
+}
+
+func main() {
+	logrus.SetReportCaller(true)
+	c, err := ReadConfig(DefaultConfigFile)
+	if err != nil {
+		logrus.Fatalln(err)
+	}
+
+	mh := NewMainHandler(c)
+
+	mux := http.ServeMux{}
+	mux.HandleFunc("/", mh.rootPage)
+	mux.HandleFunc("/profile", mh.profile)
+
+	srv := http.Server{
+		Addr:    "0.0.0.0:8090",
+		Handler: &mux,
+	}
 
 	if err := srv.ListenAndServe(); err != nil {
-		log.Println(err)
+		logrus.Fatalln(err)
 	}
 }
