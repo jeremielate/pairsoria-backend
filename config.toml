@@ -7,7 +7,7 @@ user = "psoriasis"
 password = "psoriasis"
 
 [redis]
-address = "localhost"
+address = "localhost:6379"
 password = ""
 DbNumber = 0
 
