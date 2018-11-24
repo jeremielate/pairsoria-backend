@@ -18,11 +18,13 @@ type MainHandler struct {
 
 // page principale
 func (h MainHandler) rootPage(w http.ResponseWriter, r *http.Request) {
+	logrus.Infof("%v %v %v %v\n", r.Method, r.Proto, r.URL.String(), r.RemoteAddr)
 	http.Error(w, "not found", http.StatusNotFound)
 }
 
 // page profil, GET pour recuperer le profil, POST pour le mettre a jour
 func (h MainHandler) profile(w http.ResponseWriter, r *http.Request) {
+	logrus.Infof("%v %v %v %v\n", r.Method, r.Proto, r.URL.String(), r.RemoteAddr)
 	switch r.Method {
 	case "GET":
 		id := r.URL.Query().Get("id")
@@ -49,6 +51,7 @@ func NewMainHandler(c *Config) MainHandler {
 
 func main() {
 	logrus.SetReportCaller(true)
+
 	c, err := ReadConfig(DefaultConfigFile)
 	if err != nil {
 		logrus.Fatalln(err)
@@ -61,7 +64,7 @@ func main() {
 	mux.HandleFunc("/profile", mh.profile)
 
 	srv := http.Server{
-		Addr:    "0.0.0.0:8090",
+		Addr:    c.Address,
 		Handler: &mux,
 	}
 

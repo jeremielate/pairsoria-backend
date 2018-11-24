@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	Address  string         `toml:"address"`
 	Database databaseConfig `toml:"database"`
 	Redis    redisConfig    `toml:"redis"`
 	Session  sessionConfig  `toml:"session"`
