@@ -22,7 +22,7 @@ func TestMatch(t *testing.T) {
 	res := MatchPatients(list)
 
 	for _, couple := range res {
-		fmt.Println(couple[0], couple[1])
+		fmt.Println(couple.One, couple.Two)
 	}
 }
 
@@ -41,8 +41,8 @@ func TestMatchAge(t *testing.T) {
 	res := MatchPatients(list)
 
 	for _, couple := range res {
-		fmt.Println(couple[0], couple[1])
-		if math.Abs(float64(couple[0].Age-couple[1].Age)) > 1 {
+		fmt.Println(couple.One, couple.Two)
+		if math.Abs(float64(couple.One.Age-couple.Two.Age)) > 1 {
 			t.Fail()
 		}
 	}
