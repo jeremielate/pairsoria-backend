@@ -3,6 +3,7 @@ package match
 import (
 	"encoding/json"
 	"math"
+	"strings"
 
 	"github.com/cpmech/gosl/graph"
 	"github.com/google/uuid"
@@ -16,22 +17,48 @@ const (
 	Unspecified
 )
 
+func (g Genre) MarshalJSON() ([]byte, error) {
+	var s string
+	switch g {
+	case Female:
+		s = "female"
+	case Male:
+		s = "male"
+	default:
+		s = "unspecified"
+	}
+	return json.Marshal(s)
+}
+
+func (g *Genre) UnmarshalJSON(b []byte) error {
+	var s string
+
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+
+	switch strings.ToLower(s) {
+	case "female":
+		*g = Female
+	case "male":
+		*g = Male
+	default:
+		*g = Unspecified
+	}
+
+	return nil
+}
+
 type Patient struct {
-	Id     uuid.UUID
-	Age    int    `json:"age"`
-	Genre  Genre  `json:"genre"`
-	Points uint64 `json:"points"`
+	Id     uuid.UUID `json:"id"`
+	Age    int       `json:"age"`
+	Genre  Genre     `json:"genre"`
+	Points uint64    `json:"points"`
 }
 
 type Couple struct {
-	a, b *Patient
-}
-
-func (c Couple) MarshallJSON() ([]byte, error) {
-	var couple [2]uuid.UUID
-	couple[0] = c.a.Id
-	couple[1] = c.a.Id
-	return json.Marshal(couple)
+	One *Patient `json:"one"`
+	Two *Patient `json:"two"`
 }
 
 // calcule la proximité d'un patient avec un autre selon des critères définis.
