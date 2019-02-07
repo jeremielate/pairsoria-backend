@@ -2,6 +2,7 @@ module pairsoria.com/server
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/cpmech/gosl v0.0.0-20190102001352-442e9fffea0a
 	github.com/go-redis/redis v6.14.2+incompatible
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/websocket v1.4.0
