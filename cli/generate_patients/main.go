@@ -43,11 +43,15 @@ func main() {
 		usageAndExit()
 	}
 
-	patients := generateFakePatients(count)
+	var data struct {
+		Patients []match.Patient `json:"patients"`
+	}
+	data.Patients = generateFakePatients(count)
+
 	out := bufio.NewWriter(os.Stdout)
 	enc := json.NewEncoder(out)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(patients); err != nil {
+	if err := enc.Encode(data); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

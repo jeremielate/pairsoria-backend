@@ -12,13 +12,16 @@ import (
 func main() {
 	dec := json.NewDecoder(bufio.NewReader(os.Stdin))
 
-	patients := make([]*match.Patient, 0, 1000)
-	if err := dec.Decode(&patients); err != nil {
+	var data struct {
+		Patients []*match.Patient `json:"patients"`
+	}
+	data.Patients = make([]*match.Patient, 0, 1000)
+	if err := dec.Decode(&data); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	couples := match.MatchPatients(patients)
+	couples := match.MatchPatients(data.Patients)
 
 	out := bufio.NewWriter(os.Stdout)
 	enc := json.NewEncoder(out)
