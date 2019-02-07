@@ -1,10 +1,11 @@
 package match
 
 import (
+	"encoding/json"
 	"math"
 
 	"github.com/cpmech/gosl/graph"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 type Genre uint
@@ -16,24 +17,35 @@ const (
 )
 
 type Patient struct {
-	id     uuid.UUID
-	age    int
-	genre  Genre
-	points uint64
+	Id     uuid.UUID
+	Age    int    `json:"age"`
+	Genre  Genre  `json:"genre"`
+	Points uint64 `json:"points"`
+}
+
+type Couple struct {
+	a, b *Patient
+}
+
+func (c Couple) MarshallJSON() ([]byte, error) {
+	var couple [2]uuid.UUID
+	couple[0] = c.a.Id
+	couple[1] = c.a.Id
+	return json.Marshal(couple)
 }
 
 // calcule la proximité d'un patient avec un autre selon des critères définis.
 // TODO: à ameliorer pour un meilleur matching
 func patientProximity(a, b *Patient) float64 {
-	if a.id == b.id {
+	if a.Id == b.Id {
 		// TODO: don't match with yourself
 		return math.MaxFloat64
 	}
-	ageDiff := math.Abs(float64(a.age) - float64(b.age))
-	pointsDiff := math.Abs(float64(a.points) - float64(b.points))
+	ageDiff := math.Abs(float64(a.Age) - float64(b.Age))
+	pointsDiff := math.Abs(float64(a.Points) - float64(b.Points))
 
 	var difference float64
-	if a.genre != b.genre {
+	if a.Genre != b.Genre {
 		// valeur prise au pif
 		difference += 20
 	}
@@ -41,7 +53,7 @@ func patientProximity(a, b *Patient) float64 {
 	return pointsDiff + ageDiff + difference
 }
 
-func matchPatients(patients []*Patient, compare func(a, b *Patient) float64) [][2]*Patient {
+func matchPatients(patients []*Patient, compare func(a, b *Patient) float64) []Couple {
 	var mnk graph.Munkres
 
 	length := len(patients)
@@ -59,14 +71,14 @@ func matchPatients(patients []*Patient, compare func(a, b *Patient) float64) [][
 	mnk.SetCostMatrix(matrix)
 	mnk.Run()
 
-	res := make([][2]*Patient, len(mnk.Links))
+	res := make([]Couple, len(mnk.Links))
 	for x, y := range mnk.Links {
-		res[x] = [2]*Patient{patients[x], patients[y]}
+		res[x] = Couple{patients[x], patients[y]}
 	}
 
 	return res
 }
 
-func MatchPatients(patients []*Patient) [][2]*Patient {
+func MatchPatients(patients []*Patient) []Couple {
 	return matchPatients(patients, patientProximity)
 }
