@@ -1,0 +1,3 @@
+[submodule "match/gosl"]
+	path = match/gosl
+	url = "https://github.com/cpmech/gosl"
